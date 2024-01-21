@@ -13,10 +13,26 @@ class Channel:
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
-        self.channel_id = channel_id
+        self._channel_id = channel_id
         self.api_key = os.getenv('YT_API_KEY')
         self.youtube = build('youtube', 'v3', developerKey=self.api_key)
         self.channel_data = self.get_channel_data()
+
+        item = self.channel_data['items'][0]
+        self.title = item['snippet']['title']
+        self.description = item['snippet']['description']
+        self.url = f"https://www.youtube.com/channel/{self.channel_id}"
+        self.subscriber_count = int(item['statistics'].get('subscriberCount', 0))
+        self.video_count = int(item['statistics'].get('videoCount', 0))
+        self.view_count = int(item['statistics'].get('viewCount', 0))
+
+    @property
+    def channel_id(self):
+        return self._channel_id
+
+    @channel_id.setter
+    def channel_id(self, value):
+        print("AttributeError: property 'channel_id' of 'Channel' object has no setter")
 
     def get_channel_data(self):
         """Получает полные данные о канале с YouTube API, включая общую структуру ответа."""
@@ -32,3 +48,24 @@ class Channel:
             printj(self.channel_data)
         else:
             print("Channel information not found.")
+
+    @classmethod
+    def get_service(cls):
+        """ Класс-метод для получения объекта работы с YouTube API """
+        api_key = os.getenv('YT_API_KEY')
+        return build('youtube', 'v3', developerKey=api_key)
+
+    def to_json(self, filename: str) -> None:
+        """ Сохраняет данные канала в файл формата JSON """
+        channel_info = {
+            'id': self.channel_id,
+            'title': self.title,
+            'description': self.description,
+            'url': self.url,
+            'subscriber_count': self.subscriber_count,
+            'video_count': self.video_count,
+            'view_count': self.view_count
+        }
+
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(channel_info, file, ensure_ascii=False, indent=2)
