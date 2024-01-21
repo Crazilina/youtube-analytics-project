@@ -30,10 +30,6 @@ class Channel:
     def channel_id(self):
         return self._channel_id
 
-    @channel_id.setter
-    def channel_id(self, value):
-        print("AttributeError: property 'channel_id' of 'Channel' object has no setter")
-
     def get_channel_data(self):
         """Получает полные данные о канале с YouTube API, включая общую структуру ответа."""
         request = self.youtube.channels().list(
