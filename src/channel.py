@@ -65,3 +65,30 @@ class Channel:
 
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(channel_info, file, ensure_ascii=False, indent=2)
+
+    def __str__(self):
+        return f"{self.title} (https://www.youtube.com/channel/{self.channel_id})"
+
+    def __add__(self, other):
+        return self.subscriber_count + other.subscriber_count
+
+    def __sub__(self, other):
+        return self.subscriber_count - other.subscriber_count
+
+    def __gt__(self, other):
+        return self.subscriber_count > other.subscriber_count
+
+    def __ge__(self, other):
+        return self.subscriber_count >= other.subscriber_count
+
+    def __lt__(self, other):
+        return self.subscriber_count < other.subscriber_count
+
+    def __le__(self, other):
+        return self.subscriber_count <= other.subscriber_count
+
+    def __eq__(self, other):
+        return self.subscriber_count == other.subscriber_count
+
+
+
