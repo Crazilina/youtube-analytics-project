@@ -1,15 +1,13 @@
-import os
 import isodate
 import datetime
-from googleapiclient.discovery import build
 from src.video import Video
+from .youtube_service import YouTubeService
 
 
-class PlayList:
+class PlayList(YouTubeService):
     def __init__(self, playlist_id: str) -> None:
+        super().__init__()  # Инициализация YouTube API через базовый класс
         self.playlist_id = playlist_id
-        self.api_key = os.getenv('YT_API_KEY')
-        self.youtube = build('youtube', 'v3', developerKey=self.api_key)
         self.playlist_data = self.get_playlist_data()
         self.videos = self.get_playlist_videos()
 
@@ -74,8 +72,8 @@ class PlayList:
 
         for video_id in self.videos:
             video = Video(video_id)
-            if hasattr(video, 'likes') and video.likes is not None and video.likes > max_likes:
-                max_likes = video.likes
+            if hasattr(video, 'likes') and video.like_count is not None and video.like_count > max_likes:
+                max_likes = video.like_count
                 best_video = video
 
         return f"https://youtu.be/{best_video.video_id}" if best_video else ''
