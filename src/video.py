@@ -1,35 +1,40 @@
-import os
-from googleapiclient.discovery import build
+from .youtube_service import YouTubeService
 
 
-class Video:
+class Video(YouTubeService):
     def __init__(self, video_id: str) -> None:
+        super().__init__()  # Инициализация YouTube API через базовый класс
         self.video_id = video_id
-        self.api_key = os.getenv('YT_API_KEY')
-        self.youtube = build('youtube', 'v3', developerKey=self.api_key)
+        self.title = None  # Инициализация свойств значением None
+        self.views = None
+        self.like_count = None
+        self.link = None
+
         self.video_data = self.get_video_data()
-        if self.video_data and 'items' in self.video_data and len(self.video_data['items']) > 0:
-            item = self.video_data['items'][0]
-            self.title = item['snippet']['title']
-            self.views = int(item['statistics'].get('viewCount', 0))
-            self.likes = int(item['statistics'].get('likeCount', 0))
-            self.link = f"https://www.youtube.com/watch?v={self.video_id}"
-        else:
-            self.title = ''
-            self.views = 0
-            self.likes = 0
-            self.link = ''
+
+        if self.video_data:  # Проверяем, не None ли возвращено
+            items = self.video_data.get('items', [])
+            if items:
+                item = items[0]
+                self.title = item.get('snippet', {}).get('title')
+                self.views = int(item.get('statistics', {}).get('viewCount', 0))
+                self.like_count = int(item.get('statistics', {}).get('likeCount', 0))
+                self.link = f"https://www.youtube.com/watch?v={self.video_id}"
+            # Если self.video_data is None, свойства уже инициализированы как None
 
     def get_video_data(self) -> dict:
-        """Получает данные о видео с YouTube API."""
-        request = self.youtube.videos().list(
-            id=self.video_id,
-            part='snippet,statistics'
-        )
-        return request.execute()
+        try:
+            request = self.youtube.videos().list(
+                id=self.video_id,
+                part='snippet,statistics'
+            )
+            return request.execute()
+        except Exception as e:
+            print(f"Error fetching video data for ID {self.video_id}: {e}")
+            return None  # Оставляем возвращение None в случае исключения
 
     def __str__(self) -> str:
-        return self.title
+        return self.title if self.title else "No title available"
 
 
 class PLVideo(Video):
